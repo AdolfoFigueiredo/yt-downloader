@@ -1,0 +1,12 @@
+services:
+  yt-downloader:
+    build: .
+    container_name: yt_downloader_api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Salva os arquivos baixados diretamente na sua pasta local ~/Downloads/yt-api
+      - ~/Downloads/yt-api:/app/downloads
+    environment:
+      - DOWNLOAD_DIR=/app/downloads
+    restart: unless-stopped
