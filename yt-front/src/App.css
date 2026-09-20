@@ -179,15 +179,30 @@
         height: 40px;
         padding: 5px 10px;
         border-radius: 5px;
-        border: 1px solid var(--cor-azul);
+        border: 1px solid var(--cor-azul-escuro);
         margin-top: 10px ;
     }
 
 }
 
 form div{
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+    button{
+        width: 100px;
+        height: 30px;
+        border: none;
+        color: var(--cor-branca);
+            background: linear-gradient(
+        20deg,
+        var(--cor-grafite),
+        var(--cor-azul-hover)
+    );
+        border-radius: 5px;
+    }
 
-    
+
 }
 
 
