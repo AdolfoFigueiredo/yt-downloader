@@ -128,7 +128,7 @@
     background-color: var(--cor-fundo);
     width: 100%;
     box-shadow: var(--shadow-premium);
-    border-bottom: 2px double var(--cor-azul-escuro);
+    border-bottom: 2px double var(--cor-azul-claro);
     img{
         width: 200px;
     }
@@ -259,6 +259,13 @@ form div{
         background:
         linear-gradient(#fff, #fff) padding-box,
         var(--gradient-download) border-box
+    }
+
+    button:hover{
+        background-color: var(--cor-sucesso);
+        color: var(--cor-branca);
+        transition: 0.5s;
+        cursor: pointer;
     }
 }
 
