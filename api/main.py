@@ -1,4 +1,5 @@
 import os
+import base64
 from fastapi import FastAPI, HTTPException 
 from pydantic import BaseModel, HttpUrl 
 import yt_dlp
@@ -24,6 +25,11 @@ class DownloadRequest(BaseModel):
     url: str 
     folder_name: str | None = None
 
+class XDownloadRequest(BaseModel):
+    url: str
+    folder_name: str | None = None
+    cookies: str | None = None  # base64 encoded cookies or file path
+
 def executar_download(url: str, options: dict): 
     try: 
         with yt_dlp.YoutubeDL(options) as ydl:
@@ -31,6 +37,34 @@ def executar_download(url: str, options: dict):
         return True
     except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
+
+def get_x_options(output_path: str, cookies: str | None = None, is_audio: bool = False) -> dict:
+    """Retorna configurações específicas do yt-dlp para X (Twitter)."""
+    options = {
+        'outtmpl': f'{output_path}/%(title)s.%(ext)s',
+        'noplaylist': True,
+    }
+    
+    if cookies:
+        # Se cookies forem fornecidos, tentar usar como arquivo
+        options['cookiefile'] = cookies
+    
+    if is_audio:
+        options.update({
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        })
+    else:
+        options.update({
+            'format': 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best',
+            'merge_output_format': 'mp4',
+        })
+    
+    return options
 
 
 @app.get("/")
@@ -104,3 +138,27 @@ def download_playlist_audio(req: DownloadRequest):
     }
     executar_download(req.url, options)
     return {"status": "sucesso", "mensagem": "Playlist de áudio baixada", "destino": pasta}
+
+@app.post("/download/x/video")
+def download_x_video(request: XDownloadRequest):
+    """Download de vídeo individual do X (Twitter)."""
+    pasta = os.path.join(DOWNLOAD_DIR, request.folder_name or "x_videos")
+    options = get_x_options(pasta, request.cookies, is_audio=False)
+    executar_download(request.url, options)
+    return {
+        "status": "success",
+        "message": "Vídeo do X baixado com sucesso",
+        "destiny": pasta
+    }
+
+@app.post("/download/x/audio")
+def download_x_audio(request: XDownloadRequest):
+    """Download de áudio do X (Twitter)."""
+    pasta = os.path.join(DOWNLOAD_DIR, request.folder_name or "x_audio")
+    options = get_x_options(pasta, request.cookies, is_audio=True)
+    executar_download(request.url, options)
+    return {
+        "status": "success",
+        "message": "Áudio do X baixado com sucesso",
+        "destiny": pasta
+    }

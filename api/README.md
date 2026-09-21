@@ -66,4 +66,46 @@ Todos os Dowloads são sincronizados diretamente com o seu sistema host na pasta
     uvicorn main:app --reload`
 
 
-## Endpoits da API 
+## Endpoints da API
+
+### Download de Vídeos do X (Twitter)
+
+#### POST `/download/x/video`
+Download de vídeo individual do X (Twitter).
+
+**Parâmetros:**
+- `url` (obrigatório): URL do vídeo do X
+- `folder_name` (opcional): Nome da pasta para salvar o vídeo
+- `cookies` (opcional): Caminho do arquivo de cookies para conteúdo privado
+
+**Exemplo de uso:**
+```json
+{
+  "url": "https://x.com/usuario/status/123456789",
+  "folder_name": "meus_videos_x"
+}
+```
+
+#### POST `/download/x/audio`
+Download de áudio do X (Twitter).
+
+**Parâmetros:**
+- `url` (obrigatório): URL do vídeo do X
+- `folder_name` (opcional): Nome da pasta para salvar o áudio
+- `cookies` (opcional): Caminho do arquivo de cookies para conteúdo privado
+
+**Exemplo de uso:**
+```json
+{
+  "url": "https://x.com/usuario/status/123456789",
+  "folder_name": "meus_audios_x"
+}
+```
+
+**Como obter cookies do X:**
+1. Faça login no X (Twitter) no seu navegador
+2. Instale uma extensão como "Get cookies.txt LOCALLY" ou "EditThisCookie"
+3. Exporte os cookies do domínio x.com
+4. Salve o arquivo e use o caminho no parâmetro `cookies`
+
+### Outros Endpoints 
