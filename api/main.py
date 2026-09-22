@@ -11,9 +11,9 @@ app = FastAPI(
 )
 
 
-def get_download_path() -> str: 
+def get_download_path() -> str:
     """Retorna o caminho do diretório de downloads."""
-    download_path = os.getenv("DOWNLOAD_PATH", "downloads")
+    download_path = os.getenv("DOWNLOAD_DIR", "downloads")
     if not os.path.exists(download_path):
         os.makedirs(download_path)
     return download_path
