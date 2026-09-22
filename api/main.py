@@ -1,6 +1,7 @@
 import os
 import base64
-from fastapi import FastAPI, HTTPException, FileResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl
 import yt_dlp
 
