@@ -2,3 +2,4 @@ __pycache__/
 venv/
 *.pyc
 api/downloads
+IMPLEMENTATION_NOTES.md
