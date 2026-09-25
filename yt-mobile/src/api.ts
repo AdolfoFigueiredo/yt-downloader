@@ -1,3 +1,6 @@
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+
 // Cliente HTTP da API yt-downloader (espelha api/main.py)
 export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.100:8000";
@@ -33,6 +36,46 @@ async function post<T>(path: string, body: DownloadParams): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let inicio = 0; inicio < bytes.length; inicio += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(inicio, inicio + chunkSize));
+  }
+  return globalThis.btoa(binary);
+}
+
+async function postPlaylistZip(path: string, body: DownloadParams): Promise<DownloadResult> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+
+  const filename = path.endsWith("/audio") ? "playlist_audio.zip" : "playlist_video.zip";
+  const destino = `${FileSystem.cacheDirectory}${filename}`;
+  const base64 = arrayBufferToBase64(await res.arrayBuffer());
+  await FileSystem.writeAsStringAsync(destino, base64, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  await Sharing.shareAsync(destino, {
+    dialogTitle: "Salvar playlist",
+    mimeType: "application/zip",
+    UTI: "public.zip-archive",
+  });
+
+  return {
+    status: "success",
+    message: "Playlist salva. Escolha onde guardar o arquivo ZIP.",
+    destiny: destino,
+  };
+}
+
 /** Resolve o endpoint correto conforme plataforma / tipo / playlist. */
 export function resolveEndpoint(
   platform: Platform,
@@ -56,7 +99,11 @@ export function requestDownload(
   kind: PlaylistKind,
   params: DownloadParams
 ): Promise<DownloadResult> {
-  return post<DownloadResult>(resolveEndpoint(platform, media, kind), params);
+  const path = resolveEndpoint(platform, media, kind);
+  if (platform === "youtube" && kind === "playlist") {
+    return postPlaylistZip(path, params);
+  }
+  return post<DownloadResult>(path, params);
 }
 
 export async function checkHealth(): Promise<boolean> {
