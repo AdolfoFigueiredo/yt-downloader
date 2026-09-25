@@ -8,7 +8,6 @@ import SegmentedOption from "./src/components/SegmentedOption";
 
 export default function App() {
   const [url, setUrl] = useState("");
-  const [folder, setFolder] = useState("");
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [media, setMedia] = useState<MediaType>("video");
   const [kind, setKind] = useState<PlaylistKind>("single");
@@ -32,7 +31,6 @@ export default function App() {
       if (!online) throw new Error("API fora do ar. Confira EXPO_PUBLIC_API_URL.");
       const r = await requestDownload(platform, media, kind, {
         url: url.trim(),
-        folder_name: folder.trim() || undefined,
       });
       const dest = r.destiny ?? r.destino ?? "";
       setFeedback(`OK: ${r.message ?? r.mensagem ?? "Concluido!"}${dest ? `\n${dest}` : ""}`);
@@ -41,15 +39,15 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [url, folder, platform, media, kind]);
+  }, [url, platform, media, kind]);
 
   return (
     <View style={s.container}>
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={s.scroll}>
         <Text style={s.logo}>AV-Downloader</Text>
-        <Text style={s.title}>Baixar videos e audios</Text>
-        <Text style={s.sub}>YouTube, Playlists e X (Twitter) — MP4 / MP3</Text>
+        <Text style={s.title}>Baixar</Text>
+        <Text style={s.sub}>Vídeos, áudios e playlists do YouTube</Text>
         <Text style={s.label}>Link</Text>
         <TextInput style={s.input} placeholder="https://..." placeholderTextColor={colors.grayDark} value={url} onChangeText={setUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" />
         <Pressable onPress={paste}><Text style={s.link}>Colar da area de transferencia</Text></Pressable>
@@ -72,8 +70,7 @@ export default function App() {
             </View>
           </View>
         )}
-        <Text style={s.label}>Pasta (opcional)</Text>
-        <TextInput style={s.input} placeholder="meus_videos" placeholderTextColor={colors.grayDark} value={folder} onChangeText={setFolder} autoCapitalize="none" autoCorrect={false} />
+        <Text style={s.defaultHint}>Os arquivos são salvos na pasta padrão configurada na API.</Text>
         <Pressable style={[s.cta, loading && s.off]} onPress={download} disabled={loading}>
           {loading ? <ActivityIndicator color={colors.white} /> : <Text style={s.ctaTx}>Baixar {media === "video" ? "MP4" : "MP3"}</Text>}
         </Pressable>
@@ -99,4 +96,5 @@ const s = StyleSheet.create({
   ctaTx: { color: colors.white, fontWeight: "800", fontSize: 16 },
   fb: { marginTop: 14, backgroundColor: colors.graphiteLight, color: colors.white, padding: 12, borderRadius: 10 },
   hint: { color: colors.grayDark, marginTop: 14, fontSize: 12 },
+  defaultHint: { color: colors.gray, fontSize: 12, marginTop: 16 },
 });
