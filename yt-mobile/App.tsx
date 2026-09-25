@@ -11,6 +11,7 @@ export default function App() {
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [media, setMedia] = useState<MediaType>("video");
   const [kind, setKind] = useState<PlaylistKind>("single");
+  const [showOptions, setShowOptions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -51,23 +52,30 @@ export default function App() {
         <Text style={s.label}>Link</Text>
         <TextInput style={s.input} placeholder="https://..." placeholderTextColor={colors.grayDark} value={url} onChangeText={setUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" />
         <Pressable onPress={paste}><Text style={s.link}>Colar da area de transferencia</Text></Pressable>
-        <Text style={s.label}>Plataforma</Text>
-        <View style={s.row}>
-          <SegmentedOption label="YouTube" selected={platform === "youtube"} onPress={() => setPlatform("youtube")} />
-          <SegmentedOption label="X / Twitter" selected={platform === "x"} onPress={() => { setPlatform("x"); setKind("single"); }} />
-        </View>
-        <Text style={s.label}>Formato</Text>
-        <View style={s.row}>
-          <SegmentedOption label="MP4 Video" selected={media === "video"} onPress={() => setMedia("video")} />
-          <SegmentedOption label="MP3 Audio" selected={media === "audio"} onPress={() => setMedia("audio")} />
-        </View>
-        {platform === "youtube" && (
-          <View>
-            <Text style={s.label}>Tipo</Text>
+        <Pressable onPress={() => setShowOptions((value) => !value)}>
+          <Text style={s.optionsToggle}>{showOptions ? "Ocultar opções" : "Mais opções"}</Text>
+        </Pressable>
+        {showOptions && (
+          <View style={s.options}>
+            <Text style={s.label}>Plataforma</Text>
             <View style={s.row}>
-              <SegmentedOption label="Unico" selected={kind === "single"} onPress={() => setKind("single")} />
-              <SegmentedOption label="Playlist" selected={kind === "playlist"} onPress={() => setKind("playlist")} />
+              <SegmentedOption label="YouTube" selected={platform === "youtube"} onPress={() => setPlatform("youtube")} />
+              <SegmentedOption label="X / Twitter" selected={platform === "x"} onPress={() => { setPlatform("x"); setKind("single"); }} />
             </View>
+            <Text style={s.label}>Formato</Text>
+            <View style={s.row}>
+              <SegmentedOption label="MP4 Video" selected={media === "video"} onPress={() => setMedia("video")} />
+              <SegmentedOption label="MP3 Audio" selected={media === "audio"} onPress={() => setMedia("audio")} />
+            </View>
+            {platform === "youtube" && (
+              <View>
+                <Text style={s.label}>Tipo</Text>
+                <View style={s.row}>
+                  <SegmentedOption label="Unico" selected={kind === "single"} onPress={() => setKind("single")} />
+                  <SegmentedOption label="Playlist" selected={kind === "playlist"} onPress={() => setKind("playlist")} />
+                </View>
+              </View>
+            )}
           </View>
         )}
         <Text style={s.defaultHint}>Os arquivos são salvos na pasta padrão configurada na API.</Text>
@@ -75,7 +83,6 @@ export default function App() {
           {loading ? <ActivityIndicator color={colors.white} /> : <Text style={s.ctaTx}>Baixar {media === "video" ? "MP4" : "MP3"}</Text>}
         </Pressable>
         {feedback && <Text style={s.fb}>{feedback}</Text>}
-        <Text style={s.hint}>Emulador: http://10.0.2.2:8000. Celular: IP da maquina via EXPO_PUBLIC_API_URL.</Text>
       </ScrollView>
     </View>
   );
@@ -95,6 +102,7 @@ const s = StyleSheet.create({
   off: { opacity: 0.6 },
   ctaTx: { color: colors.white, fontWeight: "800", fontSize: 16 },
   fb: { marginTop: 14, backgroundColor: colors.graphiteLight, color: colors.white, padding: 12, borderRadius: 10 },
-  hint: { color: colors.grayDark, marginTop: 14, fontSize: 12 },
+  optionsToggle: { color: colors.blue, fontSize: 14, fontWeight: "600", marginTop: 18 },
+  options: { marginTop: 2, padding: 14, backgroundColor: colors.graphite, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
   defaultHint: { color: colors.gray, fontSize: 12, marginTop: 16 },
 });
