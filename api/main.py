@@ -1,14 +1,28 @@
 import os
-import base64
+
+import yt_dlp
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, HttpUrl
-import yt_dlp
+from pydantic import BaseModel, Field
 
 app = FastAPI(
-    title="YT-DLP Downloader API", 
-    description="API para download de vídeos e aúdios usando yt-dlp", 
-    version="1.0.0"
+    title="YT-DLP Downloader API",
+    description="""
+    API para download de vídeos e áudios de múltiplas plataformas usando yt-dlp.
+
+    Suporta:
+    - YouTube (vídeos e playlists)
+    - X/Twitter (vídeos e áudios)
+    - Outras plataformas suportadas pelo yt-dlp
+
+    ## Funcionalidades
+    - Download de vídeos em MP4 (melhor qualidade)
+    - Extração de áudio em MP3 (192kbps)
+    - Suporte a playlists
+    - Retorno direto do arquivo ao cliente
+    """,
+    version="2.0.0",
+    contact={"name": "API Support"},
 )
 
 
@@ -22,9 +36,18 @@ def get_download_path() -> str:
 
 DOWNLOAD_DIR = get_download_path()
 
-class DownloadRequest(BaseModel): 
-    url: str 
-    folder_name: str | None = None
+class DownloadRequest(BaseModel):
+    """Modelo de requisição para download de vídeo/áudio."""
+    url: str = Field(
+        ...,
+        description="URL do vídeo para download",
+        examples=["https://www.youtube.com/watch?v=example"],
+    )
+    folder_name: str | None = Field(
+        None,
+        description="Nome da pasta para salvar o arquivo (opcional)",
+        examples=["meus_videos"],
+    )
 
 class XDownloadRequest(BaseModel):
     url: str
@@ -77,15 +100,30 @@ def get_x_options(output_path: str, cookies: str | None = None, is_audio: bool =
     return options
 
 
-@app.get("/")
-def home(): 
+@app.get("/", tags=["Health"])
+def home():
+    """Endpoint de health check para verificar se a API está funcionando."""
     return {
-        "message": "API de Download Ativa", 
-        "docs": "Acesse /docs para terstar as rotas interativamente"
+        "message": "API de Download Ativa",
+        "docs": "Acesse /docs para testar as rotas interativamente",
+        "version": "2.0.0",
     }
 
-@app.post("/download/video")
+@app.post(
+    "/download/video",
+    tags=["Downloads"],
+    summary="Download de vídeo",
+    response_description="Arquivo MP4 do vídeo baixado",
+)
 def download_video(request: DownloadRequest):
+    """
+    Download de vídeo de qualquer plataforma suportada pelo yt-dlp.
+
+    - **url**: URL do vídeo (YouTube, X/Twitter, etc.)
+    - **folder_name**: Nome da pasta para salvar (opcional, padrão: 'videos')
+
+    Retorna o arquivo MP4 diretamente ao cliente.
+    """
     pasta = os.path.join(DOWNLOAD_DIR, request.folder_name or "videos")
     options = {
         'format': 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best',
@@ -97,8 +135,21 @@ def download_video(request: DownloadRequest):
     return FileResponse(filename)
 
 
-@app.post("/download/audio")
+@app.post(
+    "/download/audio",
+    tags=["Downloads"],
+    summary="Download de áudio",
+    response_description="Arquivo MP3 do áudio extraído",
+)
 def download_audio(req: DownloadRequest):
+    """
+    Download de áudio de qualquer plataforma suportada pelo yt-dlp.
+
+    - **url**: URL do vídeo (YouTube, X/Twitter, etc.)
+    - **folder_name**: Nome da pasta para salvar (opcional, padrão: 'musics')
+
+    Extrai o áudio em MP3 com qualidade de 192kbps e retorna diretamente ao cliente.
+    """
     pasta = os.path.join(DOWNLOAD_DIR, req.folder_name or 'musics')
     options = {
         'format': 'bestaudio/best',
@@ -113,8 +164,21 @@ def download_audio(req: DownloadRequest):
     filename = executar_download(req.url, options)
     return FileResponse(filename)
 
-@app.post('/download/playlist/video')
+@app.post(
+    '/download/playlist/video',
+    tags=["Playlists"],
+    summary="Download de playlist de vídeos",
+    response_description="Arquivo MP4 do primeiro vídeo da playlist",
+)
 def download_playlist_video(req: DownloadRequest):
+    """
+    Download de playlist de vídeos do YouTube.
+
+    - **url**: URL da playlist do YouTube
+    - **folder_name**: Nome da pasta para salvar (opcional)
+
+    Baixa todos os vídeos e retorna o arquivo do primeiro vídeo.
+    """
     pasta = os.path.join(DOWNLOAD_DIR, req.folder_name or "playlists_video/%(playlist_title)s")
     options = {
         'format': 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best',
@@ -125,8 +189,21 @@ def download_playlist_video(req: DownloadRequest):
     filename = executar_download(req.url, options)
     return FileResponse(filename)
 
-@app.post("/download/playlist/audio")
+@app.post(
+    "/download/playlist/audio",
+    tags=["Playlists"],
+    summary="Download de playlist de áudios",
+    response_description="Arquivo MP3 do primeiro áudio da playlist",
+)
 def download_playlist_audio(req: DownloadRequest):
+    """
+    Download de playlist de áudios do YouTube.
+
+    - **url**: URL da playlist do YouTube
+    - **folder_name**: Nome da pasta para salvar (opcional)
+
+    Extrai os áudios em MP3 e retorna o arquivo do primeiro áudio.
+    """
     pasta = os.path.join(DOWNLOAD_DIR, req.folder_name or "playlists_audio/%(playlist_title)s")
     options = {
         'format': 'bestaudio/best',

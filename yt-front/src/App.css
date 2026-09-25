@@ -1,0 +1,273 @@
+:root {
+    /* ================================
+       CORES PRINCIPAIS — AV-DOWNLOADER
+       ================================ */
+
+    /* Laranja da marca */
+    --cor-primaria: #FB4800;
+    --cor-primaria-hover: #E03700;
+    --cor-primaria-clara: #FD6501;
+    --cor-primaria-escura: #B82A01;
+
+    /* Laranja complementar */
+    --cor-laranja-claro: #FF8101;
+    --cor-laranja-intenso: #FF5A00;
+    --cor-laranja-profundo: #8B1800;
+
+
+
+    --cor-azul: #2196F3;
+    --cor-azul-hover: #1976D2;
+    --cor-azul-claro: #42A5F5;
+    --cor-azul-escuro: #0D47A1;
+    --cor-azul-suave: #90CAF9;
+
+
+    --cor-preta: #000000;
+    --cor-preto: #0A0A0A;
+    --cor-fundo: #0F1115;
+
+    --cor-grafite: #1D2026;
+    --cor-grafite-claro: #292D34;
+    --cor-grafite-escuro: #15181D;
+
+
+    --cor-branca: #FFFFFF;
+    --cor-branco-suave: #F5F5F5;
+    --cor-cinza-claro: #D1D5DB;
+    --cor-cinza: #9CA3AF;
+    --cor-cinza-escuro: #6B7280;
+
+
+    /* ================================
+       TEXTO
+       ================================ */
+
+    --cor-texto: #FFFFFF;
+    --cor-texto-secundario: #B8BCC4;
+    --cor-texto-muted: #737983;
+
+
+    /* ================================
+       BORDAS
+       ================================ */
+
+    --cor-borda: #292D34;
+    --cor-borda-hover: #3A3F47;
+
+
+    /* ================================
+       ESTADOS
+       ================================ */
+
+    --cor-sucesso: #22C55E;
+    --cor-alerta: #F59E0B;
+    --cor-erro: #EF4444;
+    --cor-info: var(--cor-azul);
+
+
+    /* ================================
+       GRADIENTES DA MARCA
+       ================================ */
+
+    --gradiente-laranja: linear-gradient(
+        135deg,
+        #FF8101 0%,
+        #FB4800 50%,
+        #B82A01 100%
+    );
+
+    --gradiente-azul: linear-gradient(
+        135deg,
+        #42A5F5 0%,
+        #2196F3 50%,
+        #0D47A1 100%
+    );
+
+    --gradiente-marca: linear-gradient(
+        135deg,
+        #FF8101 0%,
+        #FB4800 45%,
+        #2196F3 100%
+    );
+
+
+    --glow-laranja: rgba(251, 72, 0, 0.35);
+    --glow-azul: rgba(33, 150, 243, 0.35);
+
+    
+    --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-premium: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-focus: 0 0 0 3px rgba(255, 107, 44, 0.10);
+
+    :root {
+    --gradient-download: linear-gradient(
+        135deg,
+        #6EE7B7,
+        #34D399,
+        #10B981
+    );
+}
+
+}
+
+.app{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.navbar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 335px;
+    height: 100px ;
+    justify-content: space-between;
+    background-color: var(--cor-fundo);
+    width: 100%;
+    box-shadow: var(--shadow-premium);
+    border-bottom: 2px double var(--cor-azul-claro);
+    img{
+        width: 200px;
+    }
+
+    nav{
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    a{
+     text-decoration: none;
+      color: var(--cor-branca);
+    }
+
+    
+}
+
+.navbar {
+    position: relative;
+
+    background-image: url("./components/imagens/pexels-zulfugarkarimov-33440278.jpg");
+    background-size: cover;
+    background-position: center;
+
+    overflow: hidden;
+}
+
+
+.navbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 0;
+}
+
+.navbar > * {
+    position: relative;
+    z-index: 1;
+}
+
+.infor{
+    margin-top: 50px;
+    text-align: center;
+
+    h1{
+        text-shadow: var(--shadow-soft);
+        font-size:40px;
+        font-weight: 5000;
+    background: linear-gradient(
+        90deg,
+        var(--cor-grafite),
+        var(--cor-azul-hover),
+        #6C63FF
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    
+}
+}
+
+.form{
+    margin-top: 20px;
+    width: 53%;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    form{
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    input{
+        width: 100%;
+        height: 50px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-top: 10px ;
+        outline: none;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--cor-cinza);
+        
+    }
+
+}
+
+
+form div{
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+    button{
+        width: 110px;
+        height: 35px;
+        border: none;
+        color: var(--cor-grafite);
+        border-radius: 25px;
+        box-shadow: var(--shadow-soft);
+        background-color: transparent;
+        border: 1px solid var(--cor-cinza-claro);
+        
+    }
+
+
+}
+
+.download{
+    margin-top: 100px;
+
+    button{
+        width: 340px;
+        height: 50px;
+        border-radius: 25px;
+        font-size: 16px;
+        color: var(--cor-sucesso);
+        box-shadow: var(--shadow-medium);
+        border: 2px double var(--cor-sucesso);
+        background:
+        linear-gradient(#fff, #fff) padding-box,
+        var(--gradient-download) border-box
+    }
+
+    button:hover{
+        background-color: var(--cor-sucesso);
+        color: var(--cor-branca);
+        transition: 0.5s;
+        cursor: pointer;
+    }
+}
+
+
+
