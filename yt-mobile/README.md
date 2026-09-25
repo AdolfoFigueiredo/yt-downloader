@@ -15,6 +15,12 @@ App mobile em **React Native (Expo + TypeScript)** que consome a API `yt-downloa
 
 Extras: seletor plataforma/formato/tipo, pasta opcional, colar da área de transferência, health-check `GET /` antes de baixar, feedback de sucesso/erro.
 
+## SDK
+
+- **Expo SDK 57** (`expo ~57.0.25`, `react-native 0.86.3`, `react 19.2.3`) — compatível com **Expo Go SDK 57**.
+- `expo-clipboard ~57.0.2`, `expo-status-bar ~57.0.1` (versões alinhadas ao SDK 57 — no SDK 57+ os pacotes expo-* seguem o número do SDK).
+- Instalação requer `npm install --legacy-peer-deps` (peer `react-native` pede `@types/react ^19.1.1`; o template usa `~19.1.10`, resolvido com legacy-peer-deps).
+
 ## Pré-requisitos
 
 - Node 18+ / npm
@@ -34,8 +40,8 @@ cp .env.example .env
 ## Rodar
 
 ```bash
-npm install
-npm start        # abre o QR Code do Expo
+npm install --legacy-peer-deps
+npm start        # abre o QR Code do Expo (escaneie com o Expo Go SDK 57)
 npm run android  # emulador / device Android
 npm run ios      # apenas macOS
 npm run web      # preview web
@@ -51,7 +57,7 @@ yt-mobile/
 │   ├── theme.ts             # cores (iguais ao yt-front App.css)
 │   └── components/
 │       └── SegmentedOption.tsx
-├── app.json                 # config Expo (slug yt-mobile, android package)
-├── package.json             # expo ~53 + react-native 0.79 + TS
+├── app.json                 # config Expo SDK 57 (slug yt-mobile, android package)
+├── package.json             # expo ~57.0.25 + react-native 0.86.3 + react 19.2.3
 └── .env.example
 ```
