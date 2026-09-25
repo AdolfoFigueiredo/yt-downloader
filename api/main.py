@@ -1,8 +1,13 @@
 import os
-import base64
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, HttpUrl, Field
+import tempfile
+import zipfile
+
 import yt_dlp
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
+
 
 app = FastAPI(
     title="YT-DLP Downloader API",
@@ -24,6 +29,17 @@ app = FastAPI(
     contact={
         "name": "API Support",
     }
+)
+
+# Permite que um frontend acessado em outro PC consuma a API.
+# Em produção, restrinja os domínios separando por vírgula na variável CORS_ORIGINS.
+origens_cors = [origem.strip() for origem in os.getenv("CORS_ORIGINS", "*").split(",")]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origens_cors,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -83,6 +99,57 @@ def get_x_options(output_path: str, cookies: str | None = None, is_audio: bool =
         })
     
     return options
+
+
+def compactar_pasta(pasta: str) -> str:
+    """Cria um ZIP com todos os arquivos baixados e retorna seu caminho."""
+    arquivo = tempfile.NamedTemporaryFile(prefix="yt-playlist-", suffix=".zip", delete=False)
+    caminho_zip = arquivo.name
+    arquivo.close()
+
+    with zipfile.ZipFile(caminho_zip, "w", zipfile.ZIP_DEFLATED) as pacote:
+        for diretorio, _, arquivos in os.walk(pasta):
+            for nome in arquivos:
+                origem = os.path.join(diretorio, nome)
+                pacote.write(origem, os.path.relpath(origem, pasta))
+
+    return caminho_zip
+
+
+def baixar_playlist_para_zip(url: str, formato: str, background_tasks: BackgroundTasks) -> FileResponse:
+    """Baixa uma playlist em uma pasta temporária e a retorna como ZIP."""
+    with tempfile.TemporaryDirectory(prefix="yt-playlist-") as pasta:
+        if formato == "audio":
+            options = {
+                "format": "bestaudio/best",
+                "postprocessors": [{
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }],
+            }
+            nome_zip = "playlist_audio.zip"
+        else:
+            options = {
+                "format": "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best",
+                "merge_output_format": "mp4",
+            }
+            nome_zip = "playlist_video.zip"
+
+        options.update({
+            "outtmpl": os.path.join(pasta, "%(playlist_index)s - %(title)s.%(ext)s"),
+            "noplaylist": False,
+        })
+        executar_download(url, options)
+        caminho_zip = compactar_pasta(pasta)
+
+    background_tasks.add_task(os.remove, caminho_zip)
+    return FileResponse(
+        caminho_zip,
+        media_type="application/zip",
+        filename=nome_zip,
+        background=background_tasks,
+    )
 
 
 @app.get("/", tags=["Health"])
@@ -147,51 +214,25 @@ def download_audio(req: DownloadRequest):
         "destiny": pasta
     }
 
-@app.post('/download/playlist/video', tags=["Playlists"], summary="Download de playlist de vídeos", response_description="Arquivo MP4 do primeiro vídeo da playlist")
-def download_playlist_video(req: DownloadRequest):
-    """
-    Download de playlist de vídeos do YouTube.
+@app.post(
+    '/download/playlist/video',
+    tags=["Playlists"],
+    summary="Download de playlist de vídeos",
+    response_description="Arquivo ZIP com todos os vídeos da playlist",
+)
+def download_playlist_video(req: DownloadRequest, background_tasks: BackgroundTasks):
+    """Baixa todos os vídeos e retorna um ZIP para o cliente."""
+    return baixar_playlist_para_zip(req.url, "video", background_tasks)
 
-    - **url**: URL da playlist do YouTube
-    - **folder_name**: Nome da pasta para salvar (opcional, padrão: 'playlists_video/{playlist_title}')
-
-    Baixa todos os vídeos da playlist. Retorna o arquivo do primeiro vídeo.
-    Os arquivos são organizados com índice e título.
-    """
-    pasta = os.path.join(DOWNLOAD_DIR, req.folder_name or "playlists_video/%(playlist_title)s")
-    options = {
-        'format': 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best',
-        'merge_output_format': 'mp4',
-        'outtmpl': f'{pasta}/%(playlist_index)s - %(title)s.%(ext)s',
-        'noplaylist': False,
-    }
-    executar_download(req.url, options)
-    return {"status": "sucesso", "mensagem": "Playlist de vídeos baixada", "destino": pasta}
-
-@app.post("/download/playlist/audio", tags=["Playlists"], summary="Download de playlist de áudios", response_description="Arquivo MP3 do primeiro áudio da playlist")
-def download_playlist_audio(req: DownloadRequest):
-    """
-    Download de playlist de áudios do YouTube.
-
-    - **url**: URL da playlist do YouTube
-    - **folder_name**: Nome da pasta para salvar (opcional, padrão: 'playlists_audio/{playlist_title}')
-
-    Extrai o áudio de todos os vídeos da playlist em MP3 (192kbps).
-    Retorna o arquivo do primeiro áudio. Os arquivos são organizados com índice e título.
-    """
-    pasta = os.path.join(DOWNLOAD_DIR, req.folder_name or "playlists_audio/%(playlist_title)s")
-    options = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': f'{pasta}/%(playlist_index)s - %(title)s.%(ext)s',
-        'noplaylist': False,
-    }
-    executar_download(req.url, options)
-    return {"status": "sucesso", "mensagem": "Playlist de áudio baixada", "destino": pasta}
+@app.post(
+    "/download/playlist/audio",
+    tags=["Playlists"],
+    summary="Download de playlist de áudios",
+    response_description="Arquivo ZIP com todos os áudios da playlist",
+)
+def download_playlist_audio(req: DownloadRequest, background_tasks: BackgroundTasks):
+    """Baixa todos os áudios e retorna um ZIP para o cliente."""
+    return baixar_playlist_para_zip(req.url, "audio", background_tasks)
 
 @app.post("/download/x/video", tags=["X/Twitter"], summary="Download de vídeo do X (Twitter)", response_description="Arquivo MP4 do vídeo do X baixado")
 def download_x_video(request: XDownloadRequest):

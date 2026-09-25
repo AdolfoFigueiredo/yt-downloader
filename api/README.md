@@ -108,4 +108,30 @@ Download de áudio do X (Twitter).
 3. Exporte os cookies do domínio x.com
 4. Salve o arquivo e use o caminho no parâmetro `cookies`
 
+### Download de playlist para o PC do cliente
+
+Os endpoints de playlist retornam um arquivo ZIP para o computador que fez a requisição:
+
+- `POST /download/playlist/video` — `playlist_video.zip`
+- `POST /download/playlist/audio` — `playlist_audio.zip`
+
+Exemplo de requisição:
+
+```bash
+curl -X POST "http://IP_DO_SERVIDOR:8000/download/playlist/video" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url":"https://www.youtube.com/playlist?list=ID_DA_PLAYLIST"}' \\
+  -o playlist_video.zip
+```
+
+Para que outros computadores na rede local acessem a API, inicie o Uvicorn escutando todas as interfaces:
+
+```bash
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+```
+
+No Docker Compose, a porta `8000` já está publicada. Consulte a documentação em `http://IP_DO_SERVIDOR:8000/docs`.
+
+As playlists são baixadas temporariamente no servidor, compactadas em ZIP e removidas depois do envio. O servidor precisa ter `ffmpeg` instalado para merger de vídeo e conversão de áudio.
+
 ### Outros Endpoints 
