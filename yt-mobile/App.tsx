@@ -22,7 +22,7 @@ export default function App() {
 
   const download = useCallback(async () => {
     if (!url.trim()) {
-      Alert.alert("Atencao", "Cole o link do video ou playlist.");
+      Alert.alert("Falta o link", "Cole o link do vídeo ou playlist.");
       return;
     }
     setLoading(true);
@@ -46,11 +46,21 @@ export default function App() {
     <View style={s.container}>
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={s.scroll}>
-        <Text style={s.logo}>AV-Downloader</Text>
-        <Text style={s.title}>Baixar</Text>
-        <Text style={s.sub}>Vídeos, áudios e playlists do YouTube</Text>
-        <Text style={s.label}>Link</Text>
-        <TextInput style={s.input} placeholder="https://..." placeholderTextColor={colors.grayDark} value={url} onChangeText={setUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" />
+        <Text style={s.logo}>AV / DOWNLOADER</Text>
+        <Text style={s.title}>Seu download, simples.</Text>
+        <Text style={s.sub}>Cole um link do YouTube ou do X. O app cuida do resto.</Text>
+        <Text style={s.label}>Link do vídeo ou playlist</Text>
+        <TextInput
+          style={s.input}
+          placeholder="https://youtube.com/..."
+          placeholderTextColor={colors.grayDark}
+          value={url}
+          onChangeText={setUrl}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          returnKeyType="done"
+        />
         <Pressable onPress={paste}><Text style={s.link}>Colar da area de transferencia</Text></Pressable>
         <Pressable onPress={() => setShowOptions((value) => !value)}>
           <Text style={s.optionsToggle}>{showOptions ? "Ocultar opções" : "Mais opções"}</Text>
@@ -90,19 +100,28 @@ export default function App() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  scroll: { padding: 20, paddingTop: 60, gap: 8 },
-  logo: { color: colors.primary, fontWeight: "800", fontSize: 16 },
-  title: { color: colors.white, fontSize: 26, fontWeight: "800" },
-  sub: { color: colors.gray, marginBottom: 10 },
-  label: { color: colors.grayLight, fontWeight: "700", marginTop: 12 },
-  input: { backgroundColor: colors.graphite, borderColor: colors.border, borderWidth: 1, borderRadius: 10, padding: 12, color: colors.white, marginTop: 6 },
-  link: { color: colors.blue, marginTop: 8 },
+  scroll: { padding: 24, paddingTop: 72, paddingBottom: 40, gap: 10 },
+  logo: { color: colors.primary, fontWeight: "800", fontSize: 12, letterSpacing: 2, marginBottom: 8 },
+  title: { color: colors.white, fontSize: 30, lineHeight: 36, fontWeight: "800" },
+  sub: { color: colors.gray, fontSize: 15, lineHeight: 22, marginBottom: 18 },
+  label: { color: colors.grayLight, fontWeight: "700", marginTop: 8, marginBottom: 2 },
+  input: {
+    backgroundColor: colors.graphite,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    color: colors.white,
+    fontSize: 16,
+  },
+  link: { color: colors.blue, fontSize: 14, marginTop: 2, marginBottom: 6 },
   row: { flexDirection: "row", gap: 8, marginTop: 6 },
-  cta: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 26, paddingVertical: 15, alignItems: "center" },
+  cta: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 16, alignItems: "center" },
   off: { opacity: 0.6 },
   ctaTx: { color: colors.white, fontWeight: "800", fontSize: 16 },
-  fb: { marginTop: 14, backgroundColor: colors.graphiteLight, color: colors.white, padding: 12, borderRadius: 10 },
-  optionsToggle: { color: colors.blue, fontSize: 14, fontWeight: "600", marginTop: 18 },
-  options: { marginTop: 2, padding: 14, backgroundColor: colors.graphite, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
-  defaultHint: { color: colors.gray, fontSize: 12, marginTop: 16 },
+  fb: { marginTop: 16, backgroundColor: colors.graphiteLight, color: colors.white, padding: 14, borderRadius: 12, lineHeight: 20 },
+  optionsToggle: { color: colors.blue, fontSize: 14, fontWeight: "600", marginTop: 14 },
+  options: { marginTop: 4, padding: 16, backgroundColor: colors.graphite, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
+  defaultHint: { color: colors.gray, fontSize: 12, lineHeight: 18, marginTop: 12 },
 });
