@@ -1,5 +1,4 @@
 import { Download } from 'lucide-react'
-import React from 'react'
 
 const download = () => {
   return (
