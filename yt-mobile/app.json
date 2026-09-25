@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "AV-Downloader",
+    "slug": "yt-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "av-downloader",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0F1115"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.avdownloader.mobile",
+      "versionCode": 1
+    },
+    "web": {},
+    "plugins": []
+  }
+}
